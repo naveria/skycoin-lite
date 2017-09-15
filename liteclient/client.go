@@ -1,8 +1,12 @@
 package liteclient
 
 import (
+	"fmt"
+	"github.com/skycoin/skycoin/src/wallet"
 	"github.com/skycoin/mobile/service"
+	"encoding/hex"
 	"github.com/skycoin/skycoin/src/cipher"
+	"github.com/skycoin/skycoin/src/coin"
 	"errors"
 )
 
@@ -18,7 +22,7 @@ type Address struct {
 	Hours uint64
 }
 
-func PrepareTx(wlt Wallet, toAddr string, amount uint64) {
+func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 
 	// TODO: Add address and wallet validation
 	addresses, _ := Addresses(wlt.Seed, wlt.Addresses);
@@ -52,6 +56,44 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) {
 	} else {
 		txOut = append(txOut, makeTxOut(toAddr, amount, chgHours/2))
 	}
+
+	newTransaction := coin.Transaction{}
+
+	for _, in := range utxos {
+		newTransaction.PushInput(cipher.MustSHA256FromHex(*in.Hash))
+	}
+
+	for _, out := range txOut {
+		newTransaction.PushOutput(out.Address, out.Coins, out.Hours)
+	}
+
+	keys := make([]cipher.SecKey, len(utxos))
+	// TODO: Add validation
+	for i, in := range utxos {
+		s := retrievePrivateKeyForAddress(addresses, *in.Address)
+		k, _ := cipher.SecKeyFromHex(s)
+		keys[i] = k
+	}
+
+	newTransaction.SignInputs(keys)
+	newTransaction.UpdateHeader()
+	d := newTransaction.Serialize()
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println(d)
+
+	return hex.EncodeToString(d), nil
+}
+
+func getAddressesFromWallet(wlt wallet.Wallet) []string {
+	addresses := []string{}
+	for _, e := range wlt.Entries {
+		addresses = append(addresses, e.Address.String())
+	}
+	return addresses
 }
 
 func getSufficientOutputs(utxos []*service.Output, amt uint64) ([]*service.Output, error) {
@@ -89,6 +131,16 @@ func makeTxOut(addr string, coins uint64, hours uint64) coin.TransactionOutput {
 	out.Coins = coins
 	out.Hours = hours
 	return out
+}
+
+func retrievePrivateKeyForAddress(addresses []Address, address string) string {
+	for _, a := range addresses {
+		if a.Address == address {
+			return a.Secret
+		}
+	}
+
+	return ""
 }
 
 func Addresses(seed string, amount int) ([]Address, error) {
