@@ -16,6 +16,18 @@ type Address struct {
 	Hours uint64
 }
 
+func PrepareTx(wlt Wallet, toAddr string, amount uint64) {
+
+	// TODO: Add address and wallet validation
+	addresses, _ := Addresses(wlt.Seed, wlt.Addresses);
+	stringifiedAddresses := make([]string, len(addresses))
+	for i, address := range addresses {
+		stringifiedAddresses[i] = address.Address
+	}
+
+	totalUtxos, err := service.GetOutputs(stringifiedAddresses)
+}
+
 func Addresses(seed string, amount int) ([]Address, error) {
 	_, secretKeys := cipher.GenerateDeterministicKeyPairsSeed([]byte(seed), amount)
 	addresses := make([]Address, amount)
