@@ -1,5 +1,9 @@
 package service
 
+import (
+	"github.com/skycoin/mobile/sknet"
+)
+
 type Output struct {
 	Hash             *string `protobuf:"bytes,10,opt,name=hash" json:"hash,omitempty"`
 	SrcTx            *string `protobuf:"bytes,11,opt,name=src_tx" json:"src_tx,omitempty"`
@@ -39,4 +43,22 @@ func (m *Output) GetHours() uint64 {
 		return *m.Hours
 	}
 	return 0
+}
+
+func GetOutputs(addrs []string) ([]*Output, error) {
+	name := "skycoin"
+	req := OutputRequest{&name, addrs}
+	res := OutputResponse{}
+
+
+	if len(addrs) == 0 {
+		return []*Output{}, nil
+	}
+
+	if err := sknet.EncryGet(NodeAddress, "/get/utxos", req, &res); err != nil {
+		return nil, err
+	}
+
+	// TODO: Show error if not a success
+	return res.Outputs, nil
 }
