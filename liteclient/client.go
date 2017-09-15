@@ -29,3 +29,27 @@ func Addresses(seed string, amount int) ([]Address, error) {
 		}
 		addresses[i] = address
 	}
+
+	return addresses, nil
+}
+
+func AddressesWithBalance(addresses []Address) ([]Address, error) {
+	stringifiedAddresses := make([]string, len(addresses))
+	for i, address := range addresses {
+		stringifiedAddresses[i] = address.Address
+	}
+
+	outputs, _ := service.GetOutputs(stringifiedAddresses)
+
+	for _, output := range outputs {
+		for i, address := range addresses {
+			if address.Address == output.GetAddress() {
+				addresses[i].Coins += output.GetCoins()
+				addresses[i].Hours += output.GetHours()
+			}
+		}
+	}
+
+	return addresses, nil
+}
+
