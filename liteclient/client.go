@@ -1,7 +1,9 @@
 package liteclient
 
 import (
+	"github.com/skycoin/mobile/service"
 	"github.com/skycoin/skycoin/src/cipher"
+	"errors"
 )
 
 type Wallet struct {
@@ -26,6 +28,38 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) {
 	}
 
 	totalUtxos, err := service.GetOutputs(stringifiedAddresses)
+
+	utxos, err := getSufficientOutputs(totalUtxos, amount)
+	// TODO: add catch for err
+}
+
+func getSufficientOutputs(utxos []*service.Output, amt uint64) ([]*service.Output, error) {
+	outMap := make(map[string][]*service.Output)
+	for _, u := range utxos {
+		outMap[u.GetAddress()] = append(outMap[u.GetAddress()], u)
+	}
+
+	allUtxos := []*service.Output{}
+	var allBal uint64
+	for _, utxos := range outMap {
+		allBal += func(utxos []*service.Output) uint64 {
+			var bal uint64
+			for _, u := range utxos {
+				if u.GetCoins() == 0 {
+					continue
+				}
+				bal += u.GetCoins()
+			}
+			return bal
+		}(utxos)
+
+		allUtxos = append(allUtxos, utxos...)
+		if allBal >= amt {
+			return allUtxos, nil
+		}
+	}
+
+	return nil, errors.New("insufficient balance")
 }
 
 func Addresses(seed string, amount int) ([]Address, error) {
