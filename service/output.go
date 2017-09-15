@@ -8,3 +8,35 @@ type Output struct {
 	Hours            *uint64 `protobuf:"varint,14,opt,name=hours" json:"hours,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
+
+type OutputRequest struct {
+	CoinType  	*string  `protobuf:"bytes,1,opt,name=coin_type" json:"coin_type,omitempty"`
+	Addresses	[]string `protobuf:"bytes,10,rep,name=addresses" json:"addresses,omitempty"`
+}
+
+type OutputResponse struct {
+	Result           *Result    `protobuf:"bytes,1,opt,name=result" json:"result,omitempty"`
+	Outputs         []*Output `protobuf:"bytes,12,rep,name=sky_utxos" json:"sky_utxos,omitempty"`
+	XXX_unrecognized []byte     `json:"-"`
+}
+
+func (m *Output) GetAddress() string {
+	if m != nil && m.Address != nil {
+		return *m.Address
+	}
+	return ""
+}
+
+func (m *Output) GetCoins() uint64 {
+	if m != nil && m.Coins != nil {
+		return *m.Coins
+	}
+	return 0
+}
+
+func (m *Output) GetHours() uint64 {
+	if m != nil && m.Hours != nil {
+		return *m.Hours
+	}
+	return 0
+}
