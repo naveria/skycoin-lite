@@ -22,6 +22,13 @@ type Address struct {
 	Hours uint64
 }
 
+func Send(wlt Wallet, toAddr string, amount uint64) (string, error) {
+	rawTransaction, err := PrepareTx(wlt, toAddr, amount)
+	res, err := service.InjectTransaction(rawTransaction)
+
+	return res, err
+}
+
 func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 
 	// TODO: Add address and wallet validation
