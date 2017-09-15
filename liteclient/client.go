@@ -31,6 +31,27 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) {
 
 	utxos, err := getSufficientOutputs(totalUtxos, amount)
 	// TODO: add catch for err
+
+	bal, hours := func(utxos []*service.Output) (uint64, uint64) {
+		var c, h uint64
+		for _, u := range utxos {
+			c += u.GetCoins()
+			h += u.GetHours()
+		}
+		return c, h
+	}(utxos)
+
+	var txOut []coin.TransactionOutput
+	chgAmt := bal - amount
+	chgHours := hours / 4
+	chgAddr := stringifiedAddresses[0]
+	if chgAmt > 0 {
+		txOut = append(txOut,
+			makeTxOut(toAddr, amount, chgHours/2),
+			makeTxOut(chgAddr, chgAmt, chgHours/2))
+	} else {
+		txOut = append(txOut, makeTxOut(toAddr, amount, chgHours/2))
+	}
 }
 
 func getSufficientOutputs(utxos []*service.Output, amt uint64) ([]*service.Output, error) {
@@ -60,6 +81,14 @@ func getSufficientOutputs(utxos []*service.Output, amt uint64) ([]*service.Outpu
 	}
 
 	return nil, errors.New("insufficient balance")
+}
+
+func makeTxOut(addr string, coins uint64, hours uint64) coin.TransactionOutput {
+	out := coin.TransactionOutput{}
+	out.Address = cipher.MustDecodeBase58Address(addr)
+	out.Coins = coins
+	out.Hours = hours
+	return out
 }
 
 func Addresses(seed string, amount int) ([]Address, error) {
