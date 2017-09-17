@@ -31,7 +31,6 @@ func Send(wlt Wallet, toAddr string, amount uint64) (string, error) {
 
 func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 
-	// TODO: Add address and wallet validation
 	addresses, _ := Addresses(wlt.Seed, wlt.Addresses);
 	stringifiedAddresses := make([]string, len(addresses))
 	for i, address := range addresses {
@@ -41,7 +40,10 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	totalUtxos, err := service.GetOutputs(stringifiedAddresses)
 
 	utxos, err := getSufficientOutputs(totalUtxos, amount)
-	// TODO: add catch for err
+
+	if err != nil {
+		return "", err
+	}
 
 	bal, hours := func(utxos []*service.Output) (uint64, uint64) {
 		var c, h uint64
@@ -75,10 +77,14 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	}
 
 	keys := make([]cipher.SecKey, len(utxos))
-	// TODO: Add validation
 	for i, in := range utxos {
 		s := retrievePrivateKeyForAddress(addresses, *in.Address)
-		k, _ := cipher.SecKeyFromHex(s)
+		k, err := cipher.SecKeyFromHex(s)
+
+		if err != nil {
+			return "", fmt.Errorf("invalid private key:%v", err)
+		}
+
 		keys[i] = k
 	}
 
@@ -90,17 +96,7 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 		return "", err
 	}
 
-	fmt.Println(d)
-
 	return hex.EncodeToString(d), nil
-}
-
-func getAddressesFromWallet(wlt wallet.Wallet) []string {
-	addresses := []string{}
-	for _, e := range wlt.Entries {
-		addresses = append(addresses, e.Address.String())
-	}
-	return addresses
 }
 
 func getSufficientOutputs(utxos []*service.Output, amt uint64) ([]*service.Output, error) {

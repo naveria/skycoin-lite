@@ -59,6 +59,5 @@ func GetOutputs(addrs []string) ([]*Output, error) {
 		return nil, err
 	}
 
-	// TODO: Show error if not a success
 	return res.Outputs, nil
 }
