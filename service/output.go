@@ -1,27 +1,22 @@
 package service
 
 import (
-	"github.com/skycoin/mobile/sknet"
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
+	"strings"
 )
 
 type Output struct {
 	Hash             *string `protobuf:"bytes,10,opt,name=hash" json:"hash,omitempty"`
 	SrcTx            *string `protobuf:"bytes,11,opt,name=src_tx" json:"src_tx,omitempty"`
 	Address          *string `protobuf:"bytes,12,opt,name=address" json:"address,omitempty"`
-	Coins            *uint64 `protobuf:"varint,13,opt,name=coins" json:"coins,omitempty"`
+	Coins            *float64 `protobuf:"varint,13,opt,name=coins" json:"coins,string,omitempty"`
 	Hours            *uint64 `protobuf:"varint,14,opt,name=hours" json:"hours,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
-}
-
-type OutputRequest struct {
-	CoinType  	*string  `protobuf:"bytes,1,opt,name=coin_type" json:"coin_type,omitempty"`
-	Addresses	[]string `protobuf:"bytes,10,rep,name=addresses" json:"addresses,omitempty"`
 }
 
 type OutputResponse struct {
-	Result           *Result    `protobuf:"bytes,1,opt,name=result" json:"result,omitempty"`
-	Outputs         []*Output `protobuf:"bytes,12,rep,name=sky_utxos" json:"sky_utxos,omitempty"`
-	XXX_unrecognized []byte     `json:"-"`
+	Outputs []Output `json:"head_outputs"`
 }
 
 func (m *Output) GetAddress() string {
@@ -33,7 +28,7 @@ func (m *Output) GetAddress() string {
 
 func (m *Output) GetCoins() uint64 {
 	if m != nil && m.Coins != nil {
-		return *m.Coins
+		return uint64(*m.Coins * 1000000)
 	}
 	return 0
 }
@@ -45,19 +40,17 @@ func (m *Output) GetHours() uint64 {
 	return 0
 }
 
-func GetOutputs(addrs []string) ([]*Output, error) {
-	name := "skycoin"
-	req := OutputRequest{&name, addrs}
-	res := OutputResponse{}
-
-
+func GetOutputs(addrs []string) ([]Output, error) {
 	if len(addrs) == 0 {
-		return []*Output{}, nil
+		return []Output{}, nil
 	}
 
-	if err := sknet.EncryGet(NodeAddress, "/get/utxos", req, &res); err != nil {
-		return nil, err
-	}
+	resp, err := http.Get("http://localhost:3000/outputs?addresses=" + strings.Join(addrs, ","))
 
-	return res.Outputs, nil
+	v := OutputResponse{}
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	json.Unmarshal(body,&v)
+
+	return v.Outputs, err
 }

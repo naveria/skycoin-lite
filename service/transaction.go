@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/skycoin/skycoin-exchange/src/pp"
-	"github.com/skycoin/mobile/sknet"
+	"github.com/skycoin/skycoin-exchange/src/sknet"
 )
 
 type InjectTxnReq struct {

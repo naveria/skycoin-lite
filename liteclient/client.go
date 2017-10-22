@@ -2,8 +2,7 @@ package liteclient
 
 import (
 	"fmt"
-	"github.com/skycoin/skycoin/src/wallet"
-	"github.com/skycoin/mobile/service"
+	"github.com/skycoin/skycoin-lite/service"
 	"encoding/hex"
 	"github.com/skycoin/skycoin/src/cipher"
 	"github.com/skycoin/skycoin/src/coin"
@@ -45,7 +44,7 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 		return "", err
 	}
 
-	bal, hours := func(utxos []*service.Output) (uint64, uint64) {
+	bal, hours := func(utxos []service.Output) (uint64, uint64) {
 		var c, h uint64
 		for _, u := range utxos {
 			c += u.GetCoins()
@@ -99,16 +98,16 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	return hex.EncodeToString(d), nil
 }
 
-func getSufficientOutputs(utxos []*service.Output, amt uint64) ([]*service.Output, error) {
-	outMap := make(map[string][]*service.Output)
+func getSufficientOutputs(utxos []service.Output, amt uint64) ([]service.Output, error) {
+	outMap := make(map[string][]service.Output)
 	for _, u := range utxos {
 		outMap[u.GetAddress()] = append(outMap[u.GetAddress()], u)
 	}
 
-	allUtxos := []*service.Output{}
+	allUtxos := []service.Output{}
 	var allBal uint64
 	for _, utxos := range outMap {
-		allBal += func(utxos []*service.Output) uint64 {
+		allBal += func(utxos []service.Output) uint64 {
 			var bal uint64
 			for _, u := range utxos {
 				if u.GetCoins() == 0 {
@@ -169,7 +168,9 @@ func AddressesWithBalance(addresses []Address) ([]Address, error) {
 		stringifiedAddresses[i] = address.Address
 	}
 
-	outputs, _ := service.GetOutputs(stringifiedAddresses)
+	outputs, err := service.GetOutputs(stringifiedAddresses)
+
+	fmt.Println(err)
 
 	for _, output := range outputs {
 		for i, address := range addresses {

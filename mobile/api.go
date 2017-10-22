@@ -2,7 +2,7 @@ package mobile
 
 import (
 	"github.com/skycoin/skycoin/src/cipher/go-bip39"
-	"github.com/skycoin/mobile/liteclient"
+	"github.com/skycoin/skycoin-lite/liteclient"
 	"encoding/json"
 )
 
