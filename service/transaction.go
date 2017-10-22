@@ -1,43 +1,29 @@
 package service
 
 import (
-	"fmt"
-	"github.com/skycoin/skycoin-exchange/src/pp"
-	"github.com/skycoin/skycoin-exchange/src/sknet"
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
+	"bytes"
 )
 
 type InjectTxnReq struct {
-	CoinType         *string `protobuf:"bytes,10,opt,name=coin_type" json:"coin_type,omitempty"`
-	Tx               *string `protobuf:"bytes,20,opt,name=tx" json:"tx,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
-}
-
-type InjectTxnRes struct {
-	Result           *Result `protobuf:"bytes,1,req,name=result" json:"result,omitempty"`
-	Txid             *string `protobuf:"bytes,10,opt,name=txid" json:"txid,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
-}
-
-func (m *InjectTxnRes) GetTxid() string {
-	if m != nil && m.Txid != nil {
-		return *m.Txid
-	}
-	return ""
+	RawTransaction               string `json:"raw,omitempty"`
 }
 
 func InjectTransaction(rawtx string) (string, error) {
+	url := "http://localhost:3000/transaction"
+
 	req := InjectTxnReq{
-		CoinType: pp.PtrString("skycoin"),
-		Tx:       pp.PtrString(rawtx),
-	}
-	res := InjectTxnRes{}
-	if err := sknet.EncryGet(NodeAddress, "/inject/tx", req, &res); err != nil {
-		return "", err
+		RawTransaction: rawtx,
 	}
 
-	if !res.Result.GetSuccess() {
-		return "", fmt.Errorf("broadcast tx failed: %v", res.Result.GetReason())
-	}
+	jsonRequest, _ := json.Marshal(req)
 
-	return res.GetTxid(), nil
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonRequest))
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	text := string(body)
+
+	return text, err
 }

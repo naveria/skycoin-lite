@@ -168,9 +168,7 @@ func AddressesWithBalance(addresses []Address) ([]Address, error) {
 		stringifiedAddresses[i] = address.Address
 	}
 
-	outputs, err := service.GetOutputs(stringifiedAddresses)
-
-	fmt.Println(err)
+	outputs, _ := service.GetOutputs(stringifiedAddresses)
 
 	for _, output := range outputs {
 		for i, address := range addresses {
