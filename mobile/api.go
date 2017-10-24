@@ -21,6 +21,14 @@ func GetBalances(seed string, amount int) (string, error) {
 	return string(response), err
 }
 
+// Returns outputs, based on an array with balances
+func GetOutputs(seed string, amount int) (string, error) {
+	addresses, err := liteclient.Addresses(seed, amount)
+	outputs, err := liteclient.Outputs(addresses)
+	response, err := json.Marshal(outputs)
+	return string(response), err
+}
+
 // Returns a transaction ID
 func PostTransaction(seed string, addresses int, destinationAddress string, amount int) (string, error) {
 	wallet := liteclient.Wallet{seed, addresses}

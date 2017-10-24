@@ -182,3 +182,11 @@ func AddressesWithBalance(addresses []Address) ([]Address, error) {
 	return addresses, nil
 }
 
+func Outputs(addresses []Address) ([]service.Output, error) {
+	stringifiedAddresses := make([]string, len(addresses))
+	for i, address := range addresses {
+		stringifiedAddresses[i] = address.Address
+	}
+
+	return service.GetOutputs(stringifiedAddresses)
+}
