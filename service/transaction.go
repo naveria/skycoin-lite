@@ -12,7 +12,7 @@ type InjectTxnReq struct {
 }
 
 func InjectTransaction(rawtx string) (string, error) {
-	url := "http://localhost:3000/transaction"
+	url := NodeAddress + "/transaction"
 
 	req := InjectTxnReq{
 		RawTransaction: rawtx,

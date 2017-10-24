@@ -1,6 +1,6 @@
 package service
 
-const NodeAddress = "121.41.103.148:8080"
+const NodeAddress = "http://128.199.57.221"
 
 type Result struct {
 	Success          *bool   `protobuf:"varint,1,req,name=success" json:"success,omitempty"`

@@ -45,7 +45,7 @@ func GetOutputs(addrs []string) ([]Output, error) {
 		return []Output{}, nil
 	}
 
-	resp, err := http.Get("http://localhost:3000/outputs?addresses=" + strings.Join(addrs, ","))
+	resp, err := http.Get(NodeAddress + "/outputs?addresses=" + strings.Join(addrs, ","))
 
 	v := OutputResponse{}
 
