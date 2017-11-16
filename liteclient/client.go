@@ -2,10 +2,10 @@ package liteclient
 
 import (
 	"fmt"
-	"github.com/skycoin/skycoin-lite/service"
+	"github.com/skycoin/skycoin-lite-gopher/service"
 	"encoding/hex"
-	"github.com/skycoin/skycoin/src/cipher"
-	"github.com/skycoin/skycoin/src/coin"
+	"github.com/skycoin/skycoin-lite-gopher/cipher"
+	"github.com/skycoin/skycoin-lite-gopher/coin"
 	"errors"
 )
 

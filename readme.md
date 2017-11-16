@@ -7,5 +7,5 @@ This repository contains a liteclient for Skycoin written in Go. At the moment i
 For the compilation process to Android Archive, we use [Go Mobile](https://github.com/golang/mobile).
 
 ```bash
-$ gomobile bind -target=android github.com/montycrypto/skycoin-lite/mobile/mobile
+$ gomobile bind -target=android github.com/skycoin/skycoin-lite/mobile
 ```
