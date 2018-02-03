@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"strings"
+	"os"
 )
 
 var (
@@ -108,8 +110,8 @@ var _ent EntropyPool
 // hash of process id
 func init() {
 	seed1 := []byte(strconv.FormatUint(uint64(time.Now().UnixNano()), 16))
-	//seed2 := []byte(strings.Join(os.Environ(), ""))
-	//seed3 := []byte(strconv.FormatUint(uint64(os.Getpid()), 16))
+	seed2 := []byte(strings.Join(os.Environ(), ""))
+	seed3 := []byte(strconv.FormatUint(uint64(os.Getpid()), 16))
 
 	seed4 := make([]byte, 256)
 	io.ReadFull(crand.Reader, seed4) //system secure random number generator
@@ -123,8 +125,8 @@ func init() {
 	//mrand.Rand_rand = mrand.New(mrand.NewSource(int64(time.Now().UnixNano()))) //pseudo random
 	//seed entropy pool
 	_ent.Mix256(seed1)
-	//_ent.Mix256(seed2)
-	//_ent.Mix256(seed3)
+	_ent.Mix256(seed2)
+	_ent.Mix256(seed3)
 	_ent.Mix256(seed4)
 }
 

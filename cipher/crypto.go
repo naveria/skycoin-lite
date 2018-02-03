@@ -17,9 +17,9 @@ import (
 var (
 	//logger = logging.MustGetLogger("crypto")
 	// DebugLevel1 debug level one
-	DebugLevel1 = true //checks for extremely unlikely conditions (10e-40)
+	DebugLevel1 = false //checks for extremely unlikely conditions (10e-40)
 	// DebugLevel2 debug level two
-	DebugLevel2 = true //enable checks for impossible conditions
+	DebugLevel2 = false //enable checks for impossible conditions
 )
 
 // PubKey public key
