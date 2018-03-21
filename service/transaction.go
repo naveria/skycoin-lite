@@ -8,11 +8,11 @@ import (
 )
 
 type InjectTxnReq struct {
-	RawTransaction               string `json:"raw,omitempty"`
+	RawTransaction               string `json:"rawtx,omitempty"`
 }
 
 func InjectTransaction(rawtx string) (string, error) {
-	url := NodeAddress + "/transaction"
+	url := NodeAddress + "/injectTransaction"
 
 	req := InjectTxnReq{
 		RawTransaction: rawtx,

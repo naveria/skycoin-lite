@@ -2,6 +2,8 @@ package liteclient
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"github.com/skycoin/skycoin-lite/service"
 	"encoding/hex"
 	"github.com/skycoin/skycoin/src/cipher"
@@ -34,15 +36,17 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	stringifiedAddresses := make([]string, len(addresses))
 	for i, address := range addresses {
 		stringifiedAddresses[i] = address.Address
+		os.Stderr.WriteString("stringified addrs: "+address.Address+"\n")	
 	}
 
 	totalUtxos, err := service.GetOutputs(stringifiedAddresses)
 
 	utxos, err := getSufficientOutputs(totalUtxos, amount)
-
+os.Stderr.WriteString("scraping balance from "+strconv.Itoa(len(utxos))+" outputs")
 	if err != nil {
 		return "", err
 	}
+	os.Stderr.WriteString("sending to: "+toAddr+"\n")
 
 	bal, hours := func(utxos []service.Output) (uint64, uint64) {
 		var c, h uint64
@@ -52,7 +56,7 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 		}
 		return c, h
 	}(utxos)
-
+os.Stderr.WriteString("existing balance: "+strconv.Itoa(int(bal))+" hours "+strconv.Itoa(int(hours))+"\n")
 	var txOut []coin.TransactionOutput
 	chgAmt := bal - amount
 	chgHours := hours / 4
@@ -64,6 +68,8 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	} else {
 		txOut = append(txOut, makeTxOut(toAddr, amount, chgHours/2))
 	}
+
+os.Stderr.WriteString("change: "+strconv.Itoa(int(chgAmt))+", sending "+strconv.Itoa(int(amount))+"\n")
 
 	newTransaction := coin.Transaction{}
 
@@ -79,7 +85,8 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	for i, in := range utxos {
 		s := retrievePrivateKeyForAddress(addresses, *in.Address)
 		k, err := cipher.SecKeyFromHex(s)
-
+os.Stderr.WriteString("cipher: "+s)
+//os.Stderr.WriteString("cipher-err: "+err.Error())
 		if err != nil {
 			return "", fmt.Errorf("invalid private key:%v", err)
 		}
@@ -90,7 +97,7 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	newTransaction.SignInputs(keys)
 	newTransaction.UpdateHeader()
 	d := newTransaction.Serialize()
-
+os.Stderr.WriteString("serialized tansaction: "+string(d))
 	if err != nil {
 		return "", err
 	}

@@ -45,12 +45,11 @@ func GetOutputs(addrs []string) ([]Output, error) {
 		return []Output{}, nil
 	}
 
-	resp, err := http.Get(NodeAddress + "/outputs?addresses=" + strings.Join(addrs, ","))
+	resp, err := http.Get(NodeAddress + "/outputs?addrs=" + strings.Join(addrs, ","))
 
 	v := OutputResponse{}
 
 	body, _ := ioutil.ReadAll(resp.Body)
 	json.Unmarshal(body,&v)
-
 	return v.Outputs, err
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/skycoin/skycoin/src/cipher/go-bip39"
 	"github.com/skycoin/skycoin-lite/liteclient"
 	"encoding/json"
+	"github.com/skycoin/skycoin-lite/service"
 )
 
 // Returns a series of addresses based on a seed and the number of addresses
@@ -33,6 +34,10 @@ func GetOutputs(seed string, amount int) (string, error) {
 func PostTransaction(seed string, addresses int, destinationAddress string, amount int) (string, error) {
 	wallet := liteclient.Wallet{seed, addresses}
 	return liteclient.Send(wallet, destinationAddress, uint64(amount))
+}
+
+func SetBackendNodeAddress(nodeAddr string) {
+	service.NodeAddress = nodeAddr;
 }
 
 // Returns a nmemonic string
