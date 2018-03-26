@@ -21,6 +21,7 @@ type Address struct {
 	Secret string
 	Coins uint64
 	Hours uint64
+	CalculatedHours uint64
 }
 
 func Send(wlt Wallet, toAddr string, amount uint64) (string, error) {
@@ -36,30 +37,30 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	stringifiedAddresses := make([]string, len(addresses))
 	for i, address := range addresses {
 		stringifiedAddresses[i] = address.Address
-		os.Stderr.WriteString("stringified addrs: "+address.Address+"\n")	
+	//	os.Stderr.WriteString("stringified addrs: "+address.Address+"\n")	
 	}
 
 	totalUtxos, err := service.GetOutputs(stringifiedAddresses)
 
 	utxos, err := getSufficientOutputs(totalUtxos, amount)
-os.Stderr.WriteString("scraping balance from "+strconv.Itoa(len(utxos))+" outputs")
+	//os.Stderr.WriteString("scraping balance from "+strconv.Itoa(len(utxos))+" outputs")
 	if err != nil {
 		return "", err
 	}
-	os.Stderr.WriteString("sending to: "+toAddr+"\n")
+	//os.Stderr.WriteString("sending to: "+toAddr+"\n")
 
 	bal, hours := func(utxos []service.Output) (uint64, uint64) {
 		var c, h uint64
 		for _, u := range utxos {
 			c += u.GetCoins()
-			h += u.GetHours()
+			h += u.GetCalculatedHours()
 		}
 		return c, h
 	}(utxos)
-os.Stderr.WriteString("existing balance: "+strconv.Itoa(int(bal))+" hours "+strconv.Itoa(int(hours))+"\n")
+os.Stderr.WriteString("existing balance: "+strconv.Itoa(int(bal))+", hours "+strconv.Itoa(int(hours))+"\n")
 	var txOut []coin.TransactionOutput
 	chgAmt := bal - amount
-	chgHours := hours / 4
+	chgHours := hours / 2
 	chgAddr := stringifiedAddresses[0]
 	if chgAmt > 0 {
 		txOut = append(txOut,
@@ -85,8 +86,6 @@ os.Stderr.WriteString("change: "+strconv.Itoa(int(chgAmt))+", sending "+strconv.
 	for i, in := range utxos {
 		s := retrievePrivateKeyForAddress(addresses, *in.Address)
 		k, err := cipher.SecKeyFromHex(s)
-os.Stderr.WriteString("cipher: "+s)
-//os.Stderr.WriteString("cipher-err: "+err.Error())
 		if err != nil {
 			return "", fmt.Errorf("invalid private key:%v", err)
 		}
@@ -97,7 +96,6 @@ os.Stderr.WriteString("cipher: "+s)
 	newTransaction.SignInputs(keys)
 	newTransaction.UpdateHeader()
 	d := newTransaction.Serialize()
-os.Stderr.WriteString("serialized tansaction: "+string(d))
 	if err != nil {
 		return "", err
 	}
@@ -162,6 +160,7 @@ func Addresses(seed string, amount int) ([]Address, error) {
 			sec.Hex(),
 			0,
 			0,
+			0,
 		}
 		addresses[i] = address
 	}
@@ -182,6 +181,7 @@ func AddressesWithBalance(addresses []Address) ([]Address, error) {
 			if address.Address == output.GetAddress() {
 				addresses[i].Coins += output.GetCoins()
 				addresses[i].Hours += output.GetHours()
+				addresses[i].CalculatedHours += output.GetCalculatedHours()
 			}
 		}
 	}

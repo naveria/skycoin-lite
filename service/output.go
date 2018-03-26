@@ -13,6 +13,7 @@ type Output struct {
 	Address          *string `protobuf:"bytes,12,opt,name=address" json:"address,omitempty"`
 	Coins            *float64 `protobuf:"varint,13,opt,name=coins" json:"coins,string,omitempty"`
 	Hours            *uint64 `protobuf:"varint,14,opt,name=hours" json:"hours,omitempty"`
+	CalculatedHours  *uint64 `protobuf:"varint,15,opt,name=calculated_hours" json:"calculated_hours,omitempty"`
 }
 
 type OutputResponse struct {
@@ -36,6 +37,13 @@ func (m *Output) GetCoins() uint64 {
 func (m *Output) GetHours() uint64 {
 	if m != nil && m.Hours != nil {
 		return *m.Hours
+	}
+	return 0
+}
+
+func (m *Output) GetCalculatedHours() uint64 {
+	if m != nil && m.CalculatedHours != nil {
+		return *m.CalculatedHours
 	}
 	return 0
 }
