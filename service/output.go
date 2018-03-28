@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"strings"
+	"os"
 )
 
 type Output struct {
@@ -54,7 +55,10 @@ func GetOutputs(addrs []string) ([]Output, error) {
 	}
 
 	resp, err := http.Get(NodeAddress + "/outputs?addrs=" + strings.Join(addrs, ","))
-
+os.Stderr.WriteString("http got outputs\n")
+	if (err != nil) {
+		return nil, err
+	}
 	v := OutputResponse{}
 
 	body, _ := ioutil.ReadAll(resp.Body)

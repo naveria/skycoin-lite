@@ -5,6 +5,7 @@ import (
 	"github.com/skycoin/skycoin-lite/liteclient"
 	"encoding/json"
 	"github.com/skycoin/skycoin-lite/service"
+	"os"
 )
 
 // Returns a series of addresses based on a seed and the number of addresses
@@ -17,8 +18,15 @@ func GetAddresses(seed string, amount int) (string, error) {
 // Returns addresses with balances, based on an array with balances
 func GetBalances(seed string, amount int) (string, error) {
 	addresses, err := liteclient.Addresses(seed, amount)
+os.Stderr.WriteString("got addresses\n")
 	completeAddresses, err := liteclient.AddressesWithBalance(addresses)
+os.Stderr.WriteString("got balances for addresses\n")
+	if (err != nil) {
+		os.Stderr.WriteString("got balances error "+err.Error()+"\n")
+		return "error", err
+	}
 	response, err := json.Marshal(completeAddresses)
+os.Stderr.WriteString("marshaled and error\n")
 	return string(response), err
 }
 
