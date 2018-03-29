@@ -2,8 +2,8 @@ package liteclient
 
 import (
 	"fmt"
-	"os"
-	"strconv"
+	//"os"
+	//"strconv"
 	"github.com/skycoin/skycoin-lite/service"
 	"encoding/hex"
 	"github.com/skycoin/skycoin/src/cipher"
@@ -57,7 +57,6 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 		}
 		return c, h
 	}(utxos)
-os.Stderr.WriteString("existing balance: "+strconv.Itoa(int(bal))+", hours "+strconv.Itoa(int(hours))+"\n")
 	var txOut []coin.TransactionOutput
 	chgAmt := bal - amount
 	chgHours := hours / 2
@@ -70,7 +69,6 @@ os.Stderr.WriteString("existing balance: "+strconv.Itoa(int(bal))+", hours "+str
 		txOut = append(txOut, makeTxOut(toAddr, amount, chgHours/2))
 	}
 
-os.Stderr.WriteString("change: "+strconv.Itoa(int(chgAmt))+", sending "+strconv.Itoa(int(amount))+"\n")
 
 	newTransaction := coin.Transaction{}
 
@@ -173,9 +171,7 @@ func AddressesWithBalance(addresses []Address) ([]Address, error) {
 	for i, address := range addresses {
 		stringifiedAddresses[i] = address.Address
 	}
-os.Stderr.WriteString("addresseswithbalance: "+stringifiedAddresses[0]+"\n")
 	outputs, err := service.GetOutputs(stringifiedAddresses)
-os.Stderr.WriteString("addresseswithbalance outputs\n")
 
 	if (err != nil) {
 		return nil, err;

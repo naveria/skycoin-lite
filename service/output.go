@@ -53,10 +53,10 @@ func GetOutputs(addrs []string) ([]Output, error) {
 	if len(addrs) == 0 {
 		return []Output{}, nil
 	}
-
 	resp, err := http.Get(NodeAddress + "/outputs?addrs=" + strings.Join(addrs, ","))
-os.Stderr.WriteString("http got outputs\n")
+
 	if (err != nil) {
+		os.Stderr.WriteString("gomobile outputs error "+err.Error())
 		return nil, err
 	}
 	v := OutputResponse{}
