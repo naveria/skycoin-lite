@@ -62,11 +62,17 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	chgHours := hours / 2
 	chgAddr := stringifiedAddresses[0]
 	if chgAmt > 0 {
+		var dstTxOut, err = makeTxOut(toAddr, amount, chgHours/2)
+		if (err != nil) {
+			return "", err
+		}
+		var chgTxOut, _ = makeTxOut(chgAddr, chgAmt, chgHours/2)
 		txOut = append(txOut,
-			makeTxOut(toAddr, amount, chgHours/2),
-			makeTxOut(chgAddr, chgAmt, chgHours/2))
+			dstTxOut,
+			chgTxOut)
 	} else {
-		txOut = append(txOut, makeTxOut(toAddr, amount, chgHours/2))
+		var noChgTxOut, _ = makeTxOut(toAddr, amount, chgHours/2)
+		txOut = append(txOut, noChgTxOut)
 	}
 
 
@@ -130,12 +136,16 @@ func getSufficientOutputs(utxos []service.Output, amt uint64) ([]service.Output,
 	return nil, errors.New("insufficient balance")
 }
 
-func makeTxOut(addr string, coins uint64, hours uint64) coin.TransactionOutput {
+func makeTxOut(addr string, coins uint64, hours uint64) (coin.TransactionOutput, error) {
 	out := coin.TransactionOutput{}
-	out.Address = cipher.MustDecodeBase58Address(addr)
+	var err error
+	out.Address, err = cipher.DecodeBase58Address(addr)
+	if (err != nil) {
+		return out, errors.New("malformed address")
+	}
 	out.Coins = coins
 	out.Hours = hours
-	return out
+	return out, nil
 }
 
 func retrievePrivateKeyForAddress(addresses []Address, address string) string {
