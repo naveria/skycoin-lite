@@ -1,7 +1,7 @@
 package service
 
 
-var NodeAddress = "https://node.skycoin.net/api/"
+var NodeAddress = "https://node.skycoin.net/api"
 
 type Result struct {
 	Success          *bool   `protobuf:"varint,1,req,name=success" json:"success,omitempty"`
