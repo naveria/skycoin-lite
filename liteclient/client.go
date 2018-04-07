@@ -41,7 +41,6 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	}
 
 	totalUtxos, err := service.GetOutputs(stringifiedAddresses)
-
 	utxos, err := getSufficientOutputs(totalUtxos, amount)
 	//os.Stderr.WriteString("scraping balance from "+strconv.Itoa(len(utxos))+" outputs")
 	if err != nil {
@@ -103,7 +102,7 @@ func PrepareTx(wlt Wallet, toAddr string, amount uint64) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	
 	return hex.EncodeToString(d), nil
 }
 
